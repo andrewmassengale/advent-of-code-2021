@@ -18,15 +18,25 @@ const end = 1;
 const x = 0;
 const y = 1;
 
-const allPoints = data.reduce((points, line) => {
-	let linePoints = [ ];
+const all = { };
+const matches = { };
+const detectMatch = (x, y) => {
+	const sPoint = `${x},${y}`;
+	if (!(sPoint in all)) {
+		all[sPoint] = true;
+	} else if (!(sPoint in matches)) {
+		matches[sPoint] = true;
+	}
+}
+
+data.forEach((line) => {
 	if (line[start][x] === line[end][x]) {
 		const yStart = line[start][y] > line[end][y] ? line[end][y] : line[start][y];
 		const yEnd = line[start][y] > line[end][y] ? line[start][y] : line[end][y];
 
 		const yDiff = yEnd - yStart;
 		for (let i = 0; i <= yDiff; ++i) {
-			linePoints = linePoints.concat([ [ line[start][x], yStart + i ] ]);
+			detectMatch(line[start][x], yStart + i);
 		}
 	} else if (line[start][y] === line[end][y]) {
 		const xStart = line[start][x] > line[end][x] ? line[end][x] : line[start][x];
@@ -34,7 +44,7 @@ const allPoints = data.reduce((points, line) => {
 
 		const xDiff = xEnd - xStart;
 		for (let i = 0; i <= xDiff; ++i) {
-			linePoints = linePoints.concat([ [ xStart + i, line[start][y], ] ]);
+			detectMatch(xStart + i, line[start][y]);
 		}
 	} else {
 		const lStart = line[start][x] > line[end][x] ? line[end] : line[start];
@@ -44,14 +54,9 @@ const allPoints = data.reduce((points, line) => {
 		const diff = lEnd[x] - lStart[x];
 		for (let i = 0; i <= diff; ++i) {
 			const lY = i * yDir + lStart[y];
-			linePoints = linePoints.concat([ [ lStart[x] + i, lY ] ]);
+			detectMatch(lStart[x] + i, lY);
 		}
 	}
+});
 
-	return points.concat(linePoints);
-}, [ ])
-	.map((point) => point.join(','))
-	.filter((point, pointIndex, points) => points.indexOf(point) !== pointIndex)
-	.filter((point, pointIndex, points) => points.indexOf(point) === pointIndex);
-
-console.log(allPoints.length);
+console.log(Object.keys(matches).length);
